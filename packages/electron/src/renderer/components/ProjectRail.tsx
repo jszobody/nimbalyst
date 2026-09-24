@@ -25,7 +25,7 @@ import {
   size,
   type VirtualElement,
 } from '@floating-ui/react';
-import { windowControlsClearance } from '@nimbalyst/runtime/ui/floating/windowControlsClearance';
+import { clearWindowControls, getWindowControlsZones, windowControlsClearance } from '@nimbalyst/runtime/ui/floating/windowControlsClearance';
 import { useAtom, useAtomValue, useSetAtom, useStore } from 'jotai';
 import { OrgSwitcher } from './OrgSwitcher';
 import {
@@ -355,9 +355,12 @@ export function ProjectRail() {
       windowControlsClearance(),
       size({
         padding: 8,
-        apply({ availableHeight, elements, middlewareData }) {
-          const pushed = middlewareData.windowControlsClearance?.pushed ?? 0;
-          elements.floating.style.maxHeight = `${Math.max(0, availableHeight - pushed)}px`;
+        apply({ availableHeight, elements, x, rects }) {
+          // Reserve the controls band from the viewport's padded top, not
+          // from the menu's current y: bottom alignment makes y depend on
+          // height, so subtracting the last push can cause a resize loop.
+          const reserved = clearWindowControls(x, 8, rects.floating.width, getWindowControlsZones()) - 8;
+          elements.floating.style.maxHeight = `${Math.max(0, availableHeight - reserved)}px`;
           elements.floating.style.overflowY = 'auto';
         },
       }),
