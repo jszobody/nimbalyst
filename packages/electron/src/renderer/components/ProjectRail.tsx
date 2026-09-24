@@ -13,6 +13,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { getShowInFileBrowserLabel } from '@nimbalyst/runtime';
 import {
   useFloating,
+  autoUpdate,
   FloatingPortal,
   useDismiss,
   useHover,
@@ -342,12 +343,11 @@ export function ProjectRail() {
   } = useFloating({
     open: addMenuOpen,
     onOpenChange: setAddMenuOpen,
-    // `right-start` grows the menu downward from the top of the `+` button.
-    // The old `right-end` grew it upward, so with two or more recents it was
-    // taller than the space above the button and `shift()` clamped it to the
-    // top of the window — beside the traffic lights and ~140px away from the
-    // button that opened it, which read as "the + did nothing" (GitHub #1096).
-    placement: 'right-start',
+    // The Add button stays at the bottom of the rail. Align the menu's
+    // bottom with it, and track size changes as recent folders load.
+    placement: 'right-end',
+    strategy: 'fixed',
+    whileElementsMounted: autoUpdate,
     middleware: [
       offset(8),
       flip({ padding: 8 }),
